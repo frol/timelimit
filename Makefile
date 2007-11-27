@@ -1,4 +1,4 @@
-# $Ringlet: c/sys/timelimit/Makefile,v 1.6 2004/12/01 15:08:56 roam Exp $
+# $Ringlet$
 
 CC?=		gcc
 CFLAGS?=		-O -pipe

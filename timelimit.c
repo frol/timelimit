@@ -8,7 +8,7 @@ volatile int	fdone, falarm, fsig, sigcaught;
 int		quiet;
 
 static const char cvs_id[] =
-"$Id: timelimit.c,v 1.7 2001/05/21 14:43:40 roam Exp $";
+"$Ringlet$";
 
 static struct {
 	const char	*name, opt;

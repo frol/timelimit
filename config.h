@@ -1,7 +1,7 @@
 #ifndef _INCLUDED_TIMELIMIT_CONFIG_H
 #define _INCLUDED_TIMELIMIT_CONFIG_H
 
-/* $Id$ */
+/* $Ringlet$ */
 
 /* we hope all OS's have those..*/
 #include <sys/types.h>
