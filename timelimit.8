@@ -1,0 +1,131 @@
+.\" $Id$
+.\"
+.Dd May 16, 2001
+.Dt TIMELIMIT 8
+.Os
+.Sh NAME
+.Nm timelimit
+.Nd effectively limit the absolute execution time of a process
+.Sh SYNOPSIS
+.Nm
+.Op Fl q
+.Op Fl S Ar killsig
+.Op Fl s Ar warnsig
+.Op Fl T Ar killtime
+.Op Fl t Ar warntime
+.Ar command
+.Op Ar arguments ...
+.Sh DESCRIPTION
+.Nm
+executes a given
+.Ar command
+with the supplied
+.Ar arguments
+and terminates the spawned process after a given time with a given signal.
+If the process exits before the time limit has elapsed,
+.Nm
+will silently exit, too.
+.Pp
+Options:
+.Bl -tag -width indent
+.It Fl q
+Quiet operation -
+.Nm
+does not output diagnostic messages about signals sent to the child process.
+.It Fl S Ar killsig
+Specify the number of the signal to be sent to the process
+.Ar killtime
+seconds after
+.Ar warntime
+has expired.
+Defaults to 9 (SIGKILL).
+.It Fl s Ar warnsig
+Specify the number of the signal to be sent to the process
+.Ar warntime
+seconds after it has been started.
+Defaults to 15 (SIGTERM).
+.It Fl T Ar killtime
+Specify the maximum execution time of the process before sending
+.Ar killsig
+after
+.Ar warnsig
+has been sent.
+Defaults to 120 seconds.
+.It Fl t Ar warntime
+Specify the maximum execution time of the process in seconds before sending
+.Ar warnsig .
+Defaults to 3600 seconds.
+.El
+.Sh ENVIRONMENT
+.Bl -tag -width indent
+.It Ev KILLSIG
+The
+.Ar killsig
+to use if the
+.Fl S
+option was not specified.
+.It Ev KILLTIME
+The
+.Ar killtime
+to use if the
+.Fl T
+option was not specified.
+.It Ev WARNSIG
+The
+.Ar warnsig
+to use if the
+.Fl s
+option was not specified.
+.It Ev WARNTIME
+The
+.Ar warntime
+to use if the
+.Fl t
+option was not specified.
+.El
+.Sh EXAMPLES
+.Pp
+The following examples are shown as given to the shell:
+.Pp
+.Dl timelimit /usr/local/bin/rsync rsync://some.host/dir /opt/mirror
+.Pp
+Run the rsync program to mirror a WWW or FTP site and kill it if it
+runs longer than 1 hour (that is 3600 seconds) with SIGTERM.
+If the rsync process does not exit after receiving the SIGTERM,
+.Nm
+issues a SIGKILL 120 seconds after the SIGTERM.
+.Pp
+.Dl tcpserver 0 8888 timelimit -t600 -T300 /opt/services/chat/stats
+.Pp
+Start a
+.Xr tcpserver n
+process listening on tcp port 8888; each client connection shall invoke
+an instance of an IRC statistics tool under
+.Pa /opt/services/chat
+and kill it after 600 seconds have elapsed.
+If the stats process is still running after the SIGTERM, it will be
+killed by a SIGKILL sent 300 seconds later.
+.Pp
+.Dl env WARNTIME=600 WARNSIG=1 KILLTIME=30 timelimit sh stats.sh
+.Pp
+Start a shell script and kill it with a SIGHUP in 600 seconds.
+If the shell gets stuck and does not respond to the SIGHUP, kill it
+with the default SIGKILL after 30 more seconds.
+.Sh SEE ALSO
+.Xr kill 1 ,
+.Xr rsync 1 ,
+.Xr signal 3 ,
+.Xr tcpserver n
+.Sh STANDARDS
+No standards documentation was harmed in the process of creating
+.Nm .
+.Sh BUGS
+Please report any bugs in
+.Nm
+to the author.
+.Sh AUTHOR
+.Nm
+was conceived and written by
+.An Peter Pentchev Aq roam@orbitel.bg
+with contributions by
+.An Karsten W Rohrbach Aq karsten@rohrbach.de .
