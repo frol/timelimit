@@ -1,4 +1,4 @@
-Change log for timelimit.
+Change log for timelimit, the process time limit tool
 
 1.0pre4		not yet ;)
 	- add an 'install' target to the Makefile [roam]
