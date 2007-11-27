@@ -1,5 +1,9 @@
 Change log for timelimit.
 
+1.0pre4		not yet ;)
+	- add an 'install' target to the Makefile [roam]
+	- build and install the gzipped manual page, too [roam]
+
 1.0pre3		2001/06/09
 	- actually add the -q flag to the getopt() arguments (ARGH!) [roam]
 	- use envopts[] for time/sig variable setting (both env and cmdline)
