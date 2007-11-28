@@ -31,6 +31,7 @@ LFLAGS?=	${LDFLAGS}
 LIBS?=
 
 RM=		rm -f
+MKDIR?=		mkdir -p
 
 PROG=		timelimit
 OBJS=		timelimit.o
@@ -81,5 +82,7 @@ ${MAN8GZ}:	${MAN8}
 		mv ${MAN8GZ}.tmp ${MAN8GZ}
 
 install:	all
+		-${MKDIR} ${DESTDIR}${BINDIR}
+		-${MKDIR} ${DESTDIR}${MANDIR}8
 		install -c -o ${BINOWN} -g ${BINGRP} -m ${BINMODE} ${PROG} ${DESTDIR}${BINDIR}/
 		install -c -o ${MANOWN} -g ${MANGRP} -m ${MANMODE} ${MAN8GZ} ${DESTDIR}${MANDIR}8/

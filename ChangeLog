@@ -7,6 +7,7 @@ Change log for timelimit, the process time limit tool
 	- break the web-visible documentation out of the source tree [roam]
 	- add a two-clause BSD copyright to all files [roam]
 	- style fixes to the manual page [roam]
+	- attempt to create the installation directories [roam]
 
 1.0pre3		2001/06/09
 	- actually add the -q flag to the getopt() arguments (ARGH!) [roam]
