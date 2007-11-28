@@ -1,6 +1,6 @@
 Change log for timelimit, the process time limit tool
 
-1.0pre4		not yet ;)
+1.0		2007/11/28
 	- add an 'install' target to the Makefile [roam]
 	- build and install the gzipped manual page, too [roam]
 	- remove the TARGETS file that was never used as intended [roam]
