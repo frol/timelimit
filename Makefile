@@ -53,7 +53,7 @@ timelimit.o:	timelimit.c config.h
 		${CC} ${CFLAGS} -c timelimit.c
 
 ${MAN8GZ}:	${MAN8}
-		gzip -c ${MAN8} > ${MAN8GZ}.tmp
+		gzip -c9 ${MAN8} > ${MAN8GZ}.tmp
 		mv ${MAN8GZ}.tmp ${MAN8GZ}
 
 install:	all
