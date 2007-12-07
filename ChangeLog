@@ -1,5 +1,8 @@
 Change log for timelimit, the process time limit tool
 
+1.1		not yet ;)
+	- move the manual page from section 8 to section 1 [mario]
+
 1.0		2007/11/28
 	- add an 'install' target to the Makefile [roam]
 	- build and install the gzipped manual page, too [roam]
@@ -33,6 +36,7 @@ Change log for timelimit, the process time limit tool
 Name tags:
 	roam	Peter Pentchev <roam@ringlet.net>
 	alpha	Karsten W Rohrbach <karsten@rohrbach.de>
+	mario	Mario Iseli <mario@debian.org>
 
 Comments:	Peter Pentchev <roam@ringlet.net>
 

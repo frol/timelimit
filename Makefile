@@ -37,8 +37,8 @@ PROG=		timelimit
 OBJS=		timelimit.o
 SRCS=		timelimit.c
 
-MAN8=		timelimit.8
-MAN8GZ=		${MAN8}.gz
+MAN1=		timelimit.1
+MAN1GZ=		${MAN1}.gz
 
 LOCALBASE?=	/usr/local
 PREFIX?=	${LOCALBASE}
@@ -66,10 +66,10 @@ CFLAGS+=	-DHAVE_SIGACTION
 #CFLAGS+=	${BDECFLAGS}
 #CFLAGS+=	-ggdb -g3
 
-all:		${PROG} ${MAN8GZ}
+all:		${PROG} ${MAN1GZ}
 
 clean:
-		${RM} ${PROG} ${OBJS} ${MAN8GZ}
+		${RM} ${PROG} ${OBJS} ${MAN1GZ}
 
 ${PROG}:	${OBJS}
 		${CC} ${LFLAGS} -o ${PROG} ${OBJS}
@@ -77,12 +77,12 @@ ${PROG}:	${OBJS}
 timelimit.o:	timelimit.c config.h
 		${CC} ${CFLAGS} -c timelimit.c
 
-${MAN8GZ}:	${MAN8}
-		gzip -c9 ${MAN8} > ${MAN8GZ}.tmp
-		mv ${MAN8GZ}.tmp ${MAN8GZ}
+${MAN1GZ}:	${MAN1}
+		gzip -c9 ${MAN1} > ${MAN1GZ}.tmp
+		mv ${MAN1GZ}.tmp ${MAN1GZ}
 
 install:	all
 		-${MKDIR} ${DESTDIR}${BINDIR}
-		-${MKDIR} ${DESTDIR}${MANDIR}8
+		-${MKDIR} ${DESTDIR}${MANDIR}1
 		install -c -o ${BINOWN} -g ${BINGRP} -m ${BINMODE} ${PROG} ${DESTDIR}${BINDIR}/
-		install -c -o ${MANOWN} -g ${MANGRP} -m ${MANMODE} ${MAN8GZ} ${DESTDIR}${MANDIR}8/
+		install -c -o ${MANOWN} -g ${MANGRP} -m ${MANMODE} ${MAN1GZ} ${DESTDIR}${MANDIR}1/
