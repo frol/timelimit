@@ -1,4 +1,4 @@
-.\" Copyright (c) 2001, 2007  Peter Pentchev
+.\" Copyright (c) 2001, 2007, 2008  Peter Pentchev
 .\" All rights reserved.
 .\"
 .\" Redistribution and use in source and binary forms, with or without
@@ -24,7 +24,7 @@
 .\"
 .\" $Ringlet$
 .\"
-.Dd December 7, 2007
+.Dd August 22, 2008
 .Dt TIMELIMIT 1
 .Os
 .Sh NAME
@@ -107,6 +107,35 @@ The
 to use if the
 .Fl t
 option was not specified.
+.El
+.Sh EXIT STATUS
+If the child process exits normally, the
+.Nm
+utility will pass its exit code on up.
+If the child process is terminated by a signal, the
+.Nm
+utility's exit status is 128 plus the signal number, similar to
+.Xr sh 1 .
+.Pp
+In rare cases, the
+.Nm
+utility may encounter a system or user error; then, its exit status is one
+of the standard
+.Xr sysexits 3
+values:
+.Bl -tag -width indent
+.It Dv EX_USAGE
+The command-line parameters and options were incorrectly specified.
+.It Dv EX_SOFTWARE
+The
+.Nm
+utility itself received an unexpected signal while waiting for the child
+process to terminate.
+.It Dv EX_OSERR
+The
+.Nm
+utility was unable to execute the child process, wait for it to terminate,
+or examine its exit status.
 .El
 .Sh EXAMPLES
 .Pp

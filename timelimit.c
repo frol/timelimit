@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2001, 2007  Peter Pentchev
+ * Copyright (c) 2001, 2007, 2008  Peter Pentchev
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -55,7 +55,7 @@ static void	errx(int, const char *, ...);
 static void	usage(void);
 
 static void	init(int, char *[]);
-static void	doit(char *[]);
+static pid_t	doit(char *[]);
 static void	child(char *[]);
 static void	terminated(const char *);
 
@@ -227,7 +227,7 @@ setsig_fatal(int sig, void (*handler)(int)) {
 #endif /* HAVE_SIGACTION */
 }
     
-static void
+static pid_t
 doit(char *argv[]) {
 	pid_t pid;
 
@@ -254,7 +254,7 @@ doit(char *argv[]) {
 
 	/* send the warning signal */
 	if (fdone)
-		return;
+		return (pid);
 	if (fsig)
 		terminated("run");
 	falarm = 0;
@@ -280,12 +280,13 @@ doit(char *argv[]) {
 
 	/* send the kill signal */
 	if (fdone)
-		return;
+		return (pid);
 	if (fsig)
 		terminated("grace");
 	if (!quiet)
 		warnx("sending kill signal %lu", killsig);
 	kill(pid, (int) killsig);
+	return (pid);
 }
 
 static void
@@ -304,10 +305,21 @@ child(char *argv[]) {
 
 int
 main(int argc, char *argv[]) {
+	pid_t pid;
+	int status;
 
 	init(argc, argv);
 	argc -= optind;
 	argv += optind;
-	doit(argv);
-	return (EX_OK);
+	pid = doit(argv);
+
+	if (waitpid(pid, &status, 0) == -1)
+		errx(EX_OSERR, "could not get the exit status for process %ld",
+		    (long)pid);
+	if (WIFEXITED(status))
+		return (WEXITSTATUS(status));
+	else if (WIFSIGNALED(status))
+		return (WTERMSIG(status) + 128);
+	else
+		return (EX_OSERR);
 }
