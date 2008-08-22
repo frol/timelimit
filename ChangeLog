@@ -1,6 +1,6 @@
 Change log for timelimit, the process time limit tool
 
-1.2		not yet ;)
+1.2		2008/08/22
 	- return the child process exit code instead of always exiting
 	  with 0 [cberg, roam]
 	- define _GNU_SOURCE to properly use the Linux header files [roam]
