@@ -3,6 +3,7 @@ Change log for timelimit, the process time limit tool
 1.2		not yet ;)
 	- return the child process exit code instead of always exiting
 	  with 0 [cberg, roam]
+	- define _GNU_SOURCE to properly use the Linux header files [roam]
 
 1.1		2007/12/07
 	- move the manual page from section 8 to section 1 [mario]

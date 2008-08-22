@@ -28,6 +28,8 @@
  *
  * $Ringlet$ */
 
+#define _GNU_SOURCE
+
 /* we hope all OS's have those..*/
 #include <sys/types.h>
 #include <sys/signal.h>
