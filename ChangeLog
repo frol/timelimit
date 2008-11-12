@@ -1,6 +1,9 @@
 Change log for timelimit, the process time limit tool
 
 1.4		not yet ;)
+	- correct options parsing on GNU systems - do not let timelimit
+	  grab the option arguments passed to the executed program
+	  Debian: #505140
 
 1.3		2008/09/03
 	- fix the $Ringlet VCS keyword in the source files [roam]

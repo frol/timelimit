@@ -152,7 +152,7 @@ init(int argc, char *argv[]) {
 		}
 
 #ifdef PARSE_CMDLINE
-	while ((ch = getopt(argc, argv, "qS:s:T:t:")) != EOF) {
+	while ((ch = getopt(argc, argv, "+qS:s:T:t:")) != EOF) {
 		switch (ch) {
 			case 'q':
 				quiet = 1;
