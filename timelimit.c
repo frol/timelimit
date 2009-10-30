@@ -58,6 +58,8 @@ static void	init(int, char *[]);
 static pid_t	doit(char *[]);
 static void	child(char *[]);
 static void	raisesignal(int) __dead2;
+static void	setsig_fatal(int, void (*)(int));
+static void	setsig_fatal_gen(int, void (*)(int), int, const char *);
 static void	terminated(const char *);
 
 #ifndef HAVE_ERR
@@ -214,6 +216,12 @@ sighandler(int sig) {
 
 static void
 setsig_fatal(int sig, void (*handler)(int)) {
+	
+	setsig_fatal_gen(sig, handler, 1, "setting");
+}
+
+static void
+setsig_fatal_gen(int sig, void (*handler)(int), int nocld, const char *what) {
 #ifdef HAVE_SIGACTION
 	struct sigaction act;
 
@@ -221,13 +229,14 @@ setsig_fatal(int sig, void (*handler)(int)) {
 	act.sa_handler = handler;
 	act.sa_flags = 0;
 #ifdef SA_NOCLDSTOP
-	act.sa_flags |= SA_NOCLDSTOP;
+	if (nocld)
+		act.sa_flags |= SA_NOCLDSTOP;
 #endif /* SA_NOCLDSTOP */
 	if (sigaction(sig, &act, NULL) < 0)
-		err(EX_OSERR, "setting signal handler for %d", sig);
+		err(EX_OSERR, "%s signal handler for %d", what, sig);
 #else  /* HAVE_SIGACTION */
 	if (signal(sig, handler) == SIG_ERR)
-		err(EX_OSERR, "setting signal handler for %d", sig);
+		err(EX_OSERR, "%s signal handler for %d", what, sig);
 #endif /* HAVE_SIGACTION */
 }
     
@@ -309,18 +318,8 @@ child(char *argv[]) {
 
 static __dead2 void
 raisesignal (int sig) {
-#ifdef HAVE_SIGACTION
-	struct sigaction act;
 
-	memset(&act, 0, sizeof(act));
-	act.sa_handler = SIG_DFL;
-	act.sa_flags = 0;
-	if (sigaction(sig, &act, NULL) < 0)
-		err(EX_OSERR, "restoring signal handler for %d", sig);
-#else  /* HAVE_SIGACTION */
-	if (signal(sig, SIG_DFL) == SIG_ERR)
-		err(EX_OSERR, "restoring signal handler for %d", sig);
-#endif /* HAVE_SIGACTION */
+	setsig_fatal_gen(sig, SIG_DFL, 0, "restoring");
 	raise(sig);
 	while (1)
 		pause();
