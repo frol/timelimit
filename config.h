@@ -2,7 +2,7 @@
 #define _INCLUDED_TIMELIMIT_CONFIG_H
 
 /*-
- * Copyright (c) 2001, 2007, 2008  Peter Pentchev
+ * Copyright (c) 2001, 2007 - 2009  Peter Pentchev
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -80,5 +80,13 @@
 #define __unused
 #endif /* __GNUC__ */
 #endif /* __unused */
+
+#ifndef __dead2
+#ifdef __GNUC__
+#define __dead2 __attribute__((noreturn))
+#else  /* __GNUC__ */
+#define __dead2
+#endif /* __GNUC__ */
+#endif /* __dead2 */
 
 #endif /* _INCLUDED */
