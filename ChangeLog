@@ -1,6 +1,6 @@
 Change log for timelimit, the process time limit tool
 
-1.5		not yet ;)
+1.5		2009/10/30
 	- add the '__dead2' definition for no-return functions
 	- add the '-p' flag to propagate information about the child
 	  process being terminated by a signal [teddy, roam]
