@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2001, 2007, 2008  Peter Pentchev
+ * Copyright (c) 2001, 2007 - 2009  Peter Pentchev
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,7 +31,7 @@
 unsigned long	warntime, killtime;
 unsigned long	warnsig, killsig;
 volatile int	fdone, falarm, fsig, sigcaught;
-int		quiet;
+int		propagate, quiet;
 
 static const char cvs_id[] =
 "$Ringlet$";
@@ -57,6 +57,7 @@ static void	usage(void);
 static void	init(int, char *[]);
 static pid_t	doit(char *[]);
 static void	child(char *[]);
+static void	raisesignal(int) __dead2;
 static void	terminated(const char *);
 
 #ifndef HAVE_ERR
@@ -109,7 +110,7 @@ warnx(const char *fmt, ...) {
 
 static void
 usage(void) {
-	errx(EX_USAGE, "usage: timelimit [-q] [-S ksig] [-s wsig] "
+	errx(EX_USAGE, "usage: timelimit [-pq] [-S ksig] [-s wsig] "
 	    "[-T ktime] [-t wtime] command");
 }
 
@@ -152,8 +153,11 @@ init(int argc, char *argv[]) {
 		}
 
 #ifdef PARSE_CMDLINE
-	while ((ch = getopt(argc, argv, "+qS:s:T:t:")) != EOF) {
+	while ((ch = getopt(argc, argv, "+qpS:s:T:t:")) != EOF) {
 		switch (ch) {
+			case 'p':
+				propagate = 1;
+				break;
 			case 'q':
 				quiet = 1;
 				break;
@@ -303,6 +307,26 @@ child(char *argv[]) {
 	err(EX_OSERR, "executing %s", argv[0]);
 }
 
+static __dead2 void
+raisesignal (int sig) {
+#ifdef HAVE_SIGACTION
+	struct sigaction act;
+
+	memset(&act, 0, sizeof(act));
+	act.sa_handler = SIG_DFL;
+	act.sa_flags = 0;
+	if (sigaction(sig, &act, NULL) < 0)
+		err(EX_OSERR, "restoring signal handler for %d", sig);
+#else  /* HAVE_SIGACTION */
+	if (signal(sig, SIG_DFL) == SIG_ERR)
+		err(EX_OSERR, "restoring signal handler for %d", sig);
+#endif /* HAVE_SIGACTION */
+	raise(sig);
+	while (1)
+		pause();
+	/* NOTREACHED */
+}
+
 int
 main(int argc, char *argv[]) {
 	pid_t pid;
@@ -318,8 +342,10 @@ main(int argc, char *argv[]) {
 		    (long)pid);
 	if (WIFEXITED(status))
 		return (WEXITSTATUS(status));
-	else if (WIFSIGNALED(status))
-		return (WTERMSIG(status) + 128);
-	else
+	else if (!WIFSIGNALED(status))
 		return (EX_OSERR);
+	if (propagate)
+		raisesignal(WTERMSIG(status));
+	else
+		return (WTERMSIG(status) + 128);
 }

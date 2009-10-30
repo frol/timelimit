@@ -2,6 +2,8 @@ Change log for timelimit, the process time limit tool
 
 1.5		not yet ;)
 	- add the '__dead2' definition for no-return functions
+	- add the '-p' flag to propagate information about the child
+	  process being terminated by a signal [teddy, roam]
 
 1.4		2008/11/12
 	- correct options parsing on GNU systems - do not let timelimit
@@ -54,6 +56,7 @@ Name tags:
 	alpha	Karsten W Rohrbach <karsten@rohrbach.de>
 	mario	Mario Iseli <mario@debian.org>
 	cberg	Christoph Berg <myon@debian.org>
+	teddy	Teddy Hogeborn <teddy@fukt.bsnet.se>
 
 Comments:	Peter Pentchev <roam@ringlet.net>
 
