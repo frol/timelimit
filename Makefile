@@ -1,4 +1,4 @@
-# Copyright (c) 2001, 2007  Peter Pentchev
+# Copyright (c) 2001, 2007, 2010  Peter Pentchev
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -26,6 +26,7 @@
 
 CC?=		gcc
 CFLAGS?=		-O -pipe
+CPPFLAGS?=
 LDFLAGS?=
 LFLAGS?=	${LDFLAGS}
 LIBS?=
@@ -75,7 +76,7 @@ ${PROG}:	${OBJS}
 		${CC} ${LFLAGS} -o ${PROG} ${OBJS}
 
 timelimit.o:	timelimit.c config.h
-		${CC} ${CFLAGS} -c timelimit.c
+		${CC} ${CPPFLAGS} ${CFLAGS} -c timelimit.c
 
 ${MAN1GZ}:	${MAN1}
 		gzip -c9 ${MAN1} > ${MAN1GZ}.tmp
