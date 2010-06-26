@@ -1,5 +1,8 @@
 Change log for timelimit, the process time limit tool
 
+1.6		not yet ;)
+	- rename the ChangeLog to NEWS, since that's what it is [roam]
+
 1.5		2009/10/30
 	- add the '__dead2' definition for no-return functions
 	- add the '-p' flag to propagate information about the child
