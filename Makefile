@@ -60,6 +60,8 @@ CFLAGS+=	-DHAVE_ERR
 CFLAGS+=	-DHAVE_SYSEXITS_H
 # comment this if you do not have the errno.h header file (most systems do)
 CFLAGS+=	-DHAVE_ERRNO_H
+# comment this if you do not have setitimer(2) (most systems do)
+CFLAGS+=	-DHAVE_SETITIMER
 # comment this if you do not have sigaction(2) (most systems do)
 CFLAGS+=	-DHAVE_SIGACTION
 

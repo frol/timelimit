@@ -28,7 +28,7 @@
 
 #define PARSE_CMDLINE
 
-unsigned long	warntime, killtime;
+unsigned long	warntime, warnmsec, killtime, killmsec;
 unsigned long	warnsig, killsig;
 volatile int	fdone, falarm, fsig, sigcaught;
 int		propagate, quiet;
@@ -38,12 +38,12 @@ static const char cvs_id[] =
 
 static struct {
 	const char	*name, opt;
-	unsigned long	*var;
+	unsigned long	*sec, *msec;
 } envopts[] = {
-	{"KILLSIG",	'S',	&killsig},
-	{"KILLTIME",	'T',	&killtime},
-	{"WARNSIG",	's',	&warnsig},
-	{"WARNTIME",	't',	&warntime},
+	{"KILLSIG",	'S',	&killsig, NULL},
+	{"KILLTIME",	'T',	&killtime, &killmsec},
+	{"WARNSIG",	's',	&warnsig, NULL},
+	{"WARNTIME",	't',	&warntime, &warnmsec},
 	{NULL,		0,	NULL}
 };
 
@@ -116,17 +116,41 @@ usage(void) {
 	    "[-T ktime] [-t wtime] command");
 }
 
-static unsigned long
-atou_fatal(const char *s) {
-	unsigned long v;
+static void
+atou_fatal(const char *s, unsigned long *sec, unsigned long *msec) {
+	unsigned long v, vm, mul;
 	const char *p;
 
 	v = 0;
 	for (p = s; (*p >= '0') && (*p <= '9'); p++)
 		v = v * 10 + *p - '0';
+	if (*p == '\0') {
+		*sec = v;
+		if (msec != NULL)
+			*msec = 0;
+		return;
+	} else if (*p != '.' || msec == NULL) {
+		usage();
+	}
+	p++;
+
+	vm = 0;
+	mul = 1000000;
+	for (; (*p >= '0') && (*p <= '9'); p++) {
+		vm = vm * 10 + *p - '0';
+		mul = mul / 10;
+	}
 	if (*p != '\0')
 		usage();
-	return (v);
+	else if (mul < 1)
+		errx(EX_USAGE, "No more than microsecond precision");
+#ifndef HAVE_SETITIMER
+	if (msec != 0)
+		errx(EX_UNAVAILABLE,
+		    "Subsecond precision not supported on this platform");
+#endif
+	*sec = v;
+	*msec = vm * mul;
 }
 
 static void
@@ -143,14 +167,16 @@ init(int argc, char *argv[]) {
 	warnsig = SIGTERM;
 	killsig = SIGKILL;
 	warntime = 3600;
+	warnmsec = 0;
 	killtime = 120;
+	killmsec = 0;
 
 	optset = 0;
 	
 	/* process environment variables first */
 	for (i = 0; envopts[i].name != NULL; i++)
 		if ((s = getenv(envopts[i].name)) != NULL) {
-			*envopts[i].var = atou_fatal(s);
+			atou_fatal(s, envopts[i].sec, envopts[i].msec);
 			optset = 1;
 		}
 
@@ -167,8 +193,9 @@ init(int argc, char *argv[]) {
 				/* check if it's a recognized option */
 				for (i = 0; envopts[i].name != NULL; i++)
 					if (ch == envopts[i].opt) {
-						*envopts[i].var =
-						    atou_fatal(optarg);
+						atou_fatal(optarg,
+						    envopts[i].sec,
+						    envopts[i].msec);
 						optset = 1;
 						break;
 					}
@@ -239,6 +266,22 @@ setsig_fatal_gen(int sig, void (*handler)(int), int nocld, const char *what) {
 		err(EX_OSERR, "%s signal handler for %d", what, sig);
 #endif /* HAVE_SIGACTION */
 }
+
+static void
+settimer(const char *name, unsigned long sec, unsigned long msec)
+{
+#ifdef HAVE_SETITIMER
+	struct itimerval tval;
+
+	tval.it_interval.tv_sec = tval.it_interval.tv_usec = 0;
+	tval.it_value.tv_sec = sec;
+	tval.it_value.tv_usec = msec;
+	if (setitimer(ITIMER_REAL, &tval, NULL) == -1)
+		err(EX_OSERR, "Could not set the %s timer", name);
+#else
+	alarm(sec);
+#endif
+}
     
 static pid_t
 doit(char *argv[]) {
@@ -260,7 +303,7 @@ doit(char *argv[]) {
 		child(argv);
 
 	/* sleep for the allowed time */
-	alarm(warntime);
+	settimer("warning", warntime, warnmsec);
 	while (!(fdone || falarm || fsig))
 		pause();
 	alarm(0);
@@ -286,7 +329,7 @@ doit(char *argv[]) {
 #endif /* HAVE_SIGACTION */
 
 	/* sleep for the grace time */
-	alarm(killtime);
+	settimer("kill", killtime, killmsec);
 	while (!(fdone || falarm || fsig))
 		pause();
 	alarm(0);

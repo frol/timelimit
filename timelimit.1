@@ -1,4 +1,4 @@
-.\" Copyright (c) 2001, 2007 - 2009  Peter Pentchev
+.\" Copyright (c) 2001, 2007 - 2010  Peter Pentchev
 .\" All rights reserved.
 .\"
 .\" Redistribution and use in source and binary forms, with or without
@@ -24,7 +24,7 @@
 .\"
 .\" $Ringlet$
 .\"
-.Dd October 30, 2009
+.Dd September 29, 2010
 .Dt TIMELIMIT 1
 .Os
 .Sh NAME
@@ -89,6 +89,14 @@ Specify the maximum execution time of the process in seconds before sending
 .Ar warnsig .
 Defaults to 3600 seconds.
 .El
+.Pp
+On systems that support the
+.Xr setitimer 2
+system call, the
+.Ar warntime
+and
+.Ar killtime
+values may be specified in fractional seconds with microsecond precision.
 .Sh ENVIRONMENT
 .Bl -tag -width indent
 .It Ev KILLSIG
@@ -180,11 +188,11 @@ and kill it after 600 seconds have elapsed.
 If the stats process is still running after the SIGTERM, it will be
 killed by a SIGKILL sent 300 seconds later.
 .Pp
-.Dl env WARNTIME=600 WARNSIG=1 KILLTIME=30 timelimit sh stats.sh
+.Dl env WARNTIME=4.99 WARNSIG=1 KILLTIME=1.000001 timelimit sh stats.sh
 .Pp
-Start a shell script and kill it with a SIGHUP in 600 seconds.
+Start a shell script and kill it with a SIGHUP in a little under 5 seconds.
 If the shell gets stuck and does not respond to the SIGHUP, kill it
-with the default SIGKILL after 30 more seconds.
+with the default SIGKILL just a bit over a second afterwards.
 .Sh SEE ALSO
 .Xr kill 1 ,
 .Xr rsync 1 ,
@@ -202,7 +210,8 @@ The
 .Nm
 utility was conceived and written by
 .An Peter Pentchev Aq roam@ringlet.net
-with contributions by
-.An Karsten W Rohrbach Aq karsten@rohrbach.de
+with contributions and suggestions by
+.An Karsten W Rohrbach Aq karsten@rohrbach.de ,
+.An Teddy Hogeborn Aq teddy@fukt.bsnet.se ,
 and
-.An Teddy Hogeborn Aq teddy@fukt.bsnet.se .
+.An Tomasz Nowak Aq nowak2000@poczta.onet.pl .
