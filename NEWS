@@ -1,5 +1,7 @@
 Change log for timelimit, the process time limit tool
 
+1.7		not yet ;)
+
 1.6		2010/06/26
 	- rename the ChangeLog to NEWS, since that's what it is [roam]
 	- honor CPPFLAGS [roam]
