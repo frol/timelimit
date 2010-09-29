@@ -380,7 +380,7 @@ main(int argc, char *argv[]) {
 	pid = doit(argv);
 
 	if (waitpid(pid, &status, 0) == -1)
-		errx(EX_OSERR, "could not get the exit status for process %ld",
+		err(EX_OSERR, "could not get the exit status for process %ld",
 		    (long)pid);
 	if (WIFEXITED(status))
 		return (WEXITSTATUS(status));
