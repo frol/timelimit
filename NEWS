@@ -4,6 +4,7 @@ Change log for timelimit, the process time limit tool
 	- implement microsecond wait time precision using setitimer(2)
 	  Debian: #597824, reported by Tomasz Nowak <nowak2000@poczta.onet.pl>
 	- report the actual error condition if the waitpid() call fails [roam]
+	- do not allow SIGCHLD to interrupt waitpid() after the kill [roam]
 
 1.6		2010/06/26
 	- rename the ChangeLog to NEWS, since that's what it is [roam]
