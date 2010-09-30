@@ -218,7 +218,7 @@ init(int argc, char *argv[]) {
 		usage();
 
 	/* sanity checks */
-	if ((warntime == 0) || (killtime == 0))
+	if ((warntime == 0 && warnmsec == 0) || (killtime == 0 && killmsec == 0))
 		usage();
 }
 
