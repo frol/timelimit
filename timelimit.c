@@ -328,7 +328,7 @@ doit(char *argv[]) {
 	if (!quiet)
 		warnx("sending kill signal %lu", killsig);
 	kill(pid, (int) killsig);
-	setsig_fatal(SIGCHLD, SIG_DFL);
+	setsig_fatal_gen(SIGCHLD, SIG_DFL, 0, "restoring");
 	return (pid);
 }
 
