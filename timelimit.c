@@ -33,9 +33,6 @@ unsigned long	warnsig, killsig;
 volatile int	fdone, falarm, fsig, sigcaught;
 int		propagate, quiet;
 
-static const char cvs_id[] =
-"$Ringlet$";
-
 static struct {
 	const char	*name, opt;
 	unsigned long	*sec, *msec;

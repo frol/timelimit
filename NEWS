@@ -7,6 +7,7 @@ Change log for timelimit, the process time limit tool
 	- do not allow SIGCHLD to interrupt waitpid() after the kill [roam]
 	- remove the warn() function that is never used even on platforms
 	  that lack the err(3) family of functions [tomaszn]
+	- remove the cvs_id string
 
 1.6		2010/06/26
 	- rename the ChangeLog to NEWS, since that's what it is [roam]
