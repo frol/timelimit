@@ -44,7 +44,7 @@ static struct {
 	{"KILLTIME",	'T',	&killtime, &killmsec},
 	{"WARNSIG",	's',	&warnsig, NULL},
 	{"WARNTIME",	't',	&warntime, &warnmsec},
-	{NULL,		0,	NULL}
+	{NULL,		0,	NULL, NULL}
 };
 
 #ifndef HAVE_ERR
