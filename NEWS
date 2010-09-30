@@ -1,6 +1,6 @@
 Change log for timelimit, the process time limit tool
 
-1.7		not yet ;)
+1.7		2010/09/30
 	- implement microsecond wait time precision using setitimer(2)
 	  Debian: #597824, reported by [tomaszn]
 	- report the actual error condition if the waitpid() call fails [roam]
