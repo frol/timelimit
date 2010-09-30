@@ -129,11 +129,11 @@ atou_fatal(const char *s, unsigned long *sec, unsigned long *msec) {
 	if (*p != '\0')
 		usage();
 	else if (mul < 1)
-		errx(EX_USAGE, "No more than microsecond precision");
+		errx(EX_USAGE, "no more than microsecond precision");
 #ifndef HAVE_SETITIMER
 	if (msec != 0)
 		errx(EX_UNAVAILABLE,
-		    "Subsecond precision not supported on this platform");
+		    "subsecond precision not supported on this platform");
 #endif
 	*sec = v;
 	*msec = vm * mul;
@@ -263,7 +263,7 @@ settimer(const char *name, unsigned long sec, unsigned long msec)
 	tval.it_value.tv_sec = sec;
 	tval.it_value.tv_usec = msec;
 	if (setitimer(ITIMER_REAL, &tval, NULL) == -1)
-		err(EX_OSERR, "Could not set the %s timer", name);
+		err(EX_OSERR, "could not set the %s timer", name);
 #else
 	alarm(sec);
 #endif
