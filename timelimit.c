@@ -88,17 +88,6 @@ errx(int code, const char *fmt, ...) {
 }
 
 static void
-warn(const char *fmt, ...) {
-	va_list v;
-
-	va_start(v, fmt);
-	vfprintf(stderr, fmt, v);
-	va_end(v);
-
-	fprintf(stderr, ": %s\n", strerror(errno));
-}
-
-static void
 warnx(const char *fmt, ...) {
 	va_list v;
 
