@@ -167,7 +167,7 @@ init(int argc, char *argv[]) {
 		}
 
 #ifdef PARSE_CMDLINE
-	while ((ch = getopt(argc, argv, "+qpS:s:T:t:")) != EOF) {
+	while ((ch = getopt(argc, argv, "+qpS:s:T:t:")) != -1) {
 		switch (ch) {
 			case 'p':
 				propagate = 1;
