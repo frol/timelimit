@@ -2,6 +2,7 @@ Change log for timelimit, the process time limit tool
 
 1.8		not yet ;)
 	- getopt() returns -1 on error, not EOF [roam]
+	- add a simple test suite compatible with Perl's TAP framework
 
 1.7		2010/09/30
 	- implement microsecond wait time precision using setitimer(2)

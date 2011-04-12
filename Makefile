@@ -1,4 +1,4 @@
-# Copyright (c) 2001, 2007, 2010  Peter Pentchev
+# Copyright (c) 2001, 2007, 2010, 2011  Peter Pentchev
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -89,3 +89,6 @@ install:	all
 		-${MKDIR} ${DESTDIR}${MANDIR}1
 		install -c -o ${BINOWN} -g ${BINGRP} -m ${BINMODE} ${PROG} ${DESTDIR}${BINDIR}/
 		install -c -o ${MANOWN} -g ${MANGRP} -m ${MANMODE} ${MAN1GZ} ${DESTDIR}${MANDIR}1/
+
+check:		all
+		prove -v t
