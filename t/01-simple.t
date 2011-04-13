@@ -26,7 +26,7 @@
 
 [ -z "$TIMELIMIT" ] && TIMELIMIT='./timelimit'
 
-echo '1..24'
+echo '1..35'
 
 echo '# timelimit with no arguments should exit with EX_USAGE'
 $TIMELIMIT > /dev/null 2>&1
@@ -83,3 +83,40 @@ res="$?"
 if [ "$res" = 143 ]; then echo 'ok 22'; else echo "not ok 22 exit code $res"; fi
 if expr "x$v" : 'x1' > /dev/null; then echo 'ok 23'; else echo "not ok 23 v is '$v'"; fi
 if ! expr "x$v" : 'x.*2' > /dev/null; then echo 'ok 24'; else echo "not ok 24 v is '$v'"; fi
+
+echo '# timelimit with an invalid argument should exit with EX_USAGE'
+$TIMELIMIT -X > /dev/null 2>&1
+res="$?"
+if [ "$res" = 64 ]; then echo 'ok 25'; else echo "not ok 25 exit code $res"; fi
+
+echo '# use invalid numbers for the various options'
+v=`$TIMELIMIT -t x true 2>/dev/null`
+res="$?"
+if [ "$res" = 64 ]; then echo 'ok 26'; else echo "not ok 26 -t x exit code $res"; fi
+v=`$TIMELIMIT -T x true 2>/dev/null`
+res="$?"
+if [ "$res" = 64 ]; then echo 'ok 27'; else echo "not ok 27 -T x exit code $res"; fi
+v=`$TIMELIMIT -s x true 2>/dev/null`
+res="$?"
+if [ "$res" = 64 ]; then echo 'ok 28'; else echo "not ok 28 -s x exit code $res"; fi
+v=`$TIMELIMIT -S x true 2>/dev/null`
+res="$?"
+if [ "$res" = 64 ]; then echo 'ok 29'; else echo "not ok 29 -S x exit code $res"; fi
+v=`$TIMELIMIT -s 1.5 true 2>/dev/null`
+res="$?"
+if [ "$res" = 64 ]; then echo 'ok 30'; else echo "not ok 30 -s 1.5 exit code $res"; fi
+v=`$TIMELIMIT -S 1.5 true 2>/dev/null`
+res="$?"
+if [ "$res" = 64 ]; then echo 'ok 31'; else echo "not ok 31 -S 1.5 exit code $res"; fi
+v=`$TIMELIMIT -t '' true 2>/dev/null`
+res="$?"
+if [ "$res" = 64 ]; then echo 'ok 32'; else echo "not ok 32 -t '' exit code $res"; fi
+v=`$TIMELIMIT -T '' true 2>/dev/null`
+res="$?"
+if [ "$res" = 64 ]; then echo 'ok 33'; else echo "not ok 33 -T '' exit code $res"; fi
+v=`$TIMELIMIT -s '' true 2>/dev/null`
+res="$?"
+if [ "$res" = 64 ]; then echo 'ok 34'; else echo "not ok 34 -s '' exit code $res"; fi
+v=`$TIMELIMIT -S '' true 2>/dev/null`
+res="$?"
+if [ "$res" = 64 ]; then echo 'ok 35'; else echo "not ok 35 -S '' exit code $res"; fi
