@@ -1,6 +1,6 @@
 Change log for timelimit, the process time limit tool
 
-1.8		not yet ;)
+1.8		2011/04/13
 	- getopt() returns -1 on error, not EOF [roam]
 	- add a simple test suite compatible with Perl's TAP framework [roam]
 	- add the ability to specify signals by name and the -l
