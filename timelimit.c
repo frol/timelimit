@@ -69,7 +69,6 @@ static struct {
 	{"TTOU",	SIGTTOU},
 	{"USR1",	SIGUSR1},
 	{"USR2",	SIGUSR2},
-	{"POLL",	SIGPOLL},
 	{"PROF",	SIGPROF},
 	{"SYS",		SIGSYS},
 	{"TRAP",	SIGTRAP},
@@ -87,6 +86,9 @@ static struct {
 #endif
 #ifdef SIGLOST
 	{"LOST",	SIGLOST},
+#endif
+#ifdef SIGPOLL
+	{"POLL",	SIGPOLL},
 #endif
 #ifdef SIGPWR
 	{"PWR",		SIGPWR},
