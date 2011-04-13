@@ -178,7 +178,7 @@ static void
 atou_fatal(const char *s, unsigned long *sec, unsigned long *msec, int issig) {
 	unsigned long v, vm, mul;
 	const char *p;
-	int i;
+	size_t i;
 
 	if (s[0] < '0' || s[0] > '9') {
 		if (s[0] == '\0' || !issig)
