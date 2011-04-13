@@ -3,6 +3,9 @@ Change log for timelimit, the process time limit tool
 1.8		not yet ;)
 	- getopt() returns -1 on error, not EOF [roam]
 	- add a simple test suite compatible with Perl's TAP framework [roam]
+	- add the ability to specify signals by name and the -l
+	  command-line option to list the available signal names. [roam]
+	  Debian: #621775, suggested by [mats]
 
 1.7		2010/09/30
 	- implement microsecond wait time precision using setitimer(2)
@@ -75,6 +78,7 @@ Name tags:
 	cberg	Christoph Berg <myon@debian.org>
 	teddy	Teddy Hogeborn <teddy@fukt.bsnet.se>
 	tomaszn	Tomasz Nowak <nowak2000@poczta.onet.pl>
+	mats	Mats Erik Andersson <mats.andersson@gisladisker.se>
 
 Comments:	Peter Pentchev <roam@ringlet.net>
 

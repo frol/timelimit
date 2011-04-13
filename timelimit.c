@@ -34,15 +34,85 @@ volatile int	fdone, falarm, fsig, sigcaught;
 int		propagate, quiet;
 
 static struct {
-	const char	*name, opt;
+	const char	*name, opt, issig;
 	unsigned long	*sec, *msec;
 } envopts[] = {
-	{"KILLSIG",	'S',	&killsig, NULL},
-	{"KILLTIME",	'T',	&killtime, &killmsec},
-	{"WARNSIG",	's',	&warnsig, NULL},
-	{"WARNTIME",	't',	&warntime, &warnmsec},
-	{NULL,		0,	NULL, NULL}
+	{"KILLSIG",	'S',	1,	&killsig, NULL},
+	{"KILLTIME",	'T',	0,	&killtime, &killmsec},
+	{"WARNSIG",	's',	1,	&warnsig, NULL},
+	{"WARNTIME",	't',	0,	&warntime, &warnmsec},
+	{NULL,		0,	0,	NULL, NULL}
 };
+
+static struct {
+	const char	*name;
+	int		 num;
+} signals[] = {
+	/* We kind of assume that the POSIX-mandated signals are present */
+	{"ABRT",	SIGABRT},
+	{"ALRM",	SIGALRM},
+	{"BUS",		SIGBUS},
+	{"CHLD",	SIGCHLD},
+	{"CONT",	SIGCONT},
+	{"FPE",		SIGFPE},
+	{"HUP",		SIGHUP},
+	{"ILL",		SIGILL},
+	{"INT",		SIGINT},
+	{"KILL",	SIGKILL},
+	{"PIPE",	SIGPIPE},
+	{"QUIT",	SIGQUIT},
+	{"SEGV",	SIGSEGV},
+	{"STOP",	SIGSTOP},
+	{"TERM",	SIGTERM},
+	{"TSTP",	SIGTSTP},
+	{"TTIN",	SIGTTIN},
+	{"TTOU",	SIGTTOU},
+	{"USR1",	SIGUSR1},
+	{"USR2",	SIGUSR2},
+	{"POLL",	SIGPOLL},
+	{"PROF",	SIGPROF},
+	{"SYS",		SIGSYS},
+	{"TRAP",	SIGTRAP},
+	{"URG",		SIGURG},
+	{"VTALRM",	SIGVTALRM},
+	{"XCPU",	SIGXCPU},
+	{"XFSZ",	SIGXFSZ},
+
+	/* Some more signals found on a Linux 2.6 system */
+#ifdef SIGIO
+	{"IO",		SIGIO},
+#endif
+#ifdef SIGIOT
+	{"IOT",		SIGIOT},
+#endif
+#ifdef SIGLOST
+	{"LOST",	SIGLOST},
+#endif
+#ifdef SIGPWR
+	{"PWR",		SIGPWR},
+#endif
+#ifdef SIGSTKFLT
+	{"STKFLT",	SIGSTKFLT},
+#endif
+#ifdef SIGWINCH
+	{"WINCH",	SIGWINCH},
+#endif
+
+	/* Some more signals found on a FreeBSD 8.x system */
+#ifdef SIGEMT
+	{"EMT",		SIGEMT},
+#endif
+#ifdef SIGINFO
+	{"INFO",	SIGINFO},
+#endif
+#ifdef SIGLWP
+	{"LWP",		SIGLWP},
+#endif
+#ifdef SIGTHR
+	{"THR",		SIGTHR},
+#endif
+};
+#define SIGNALS	(sizeof(signals) / sizeof(signals[0]))
 
 #ifndef HAVE_ERR
 static void	err(int, const char *, ...);
@@ -103,9 +173,24 @@ usage(void) {
 }
 
 static void
-atou_fatal(const char *s, unsigned long *sec, unsigned long *msec) {
+atou_fatal(const char *s, unsigned long *sec, unsigned long *msec, int issig) {
 	unsigned long v, vm, mul;
 	const char *p;
+	int i;
+
+	if (s[0] < '0' || s[0] > '9') {
+		if (s[0] == '\0' || !issig)
+			usage();
+		for (i = 0; i < SIGNALS; i++)
+			if (!strcmp(signals[i].name, s))
+				break;
+		if (i == SIGNALS)
+			usage();
+		*sec = (unsigned long)signals[i].num;
+		if (msec != NULL)
+			*msec = 0;
+		return;
+	}
 
 	v = 0;
 	for (p = s; (*p >= '0') && (*p <= '9'); p++)
@@ -142,7 +227,7 @@ atou_fatal(const char *s, unsigned long *sec, unsigned long *msec) {
 static void
 init(int argc, char *argv[]) {
 #ifdef PARSE_CMDLINE
-	int ch;
+	int ch, listsigs;
 #endif
 	int optset;
 	unsigned i;
@@ -162,13 +247,18 @@ init(int argc, char *argv[]) {
 	/* process environment variables first */
 	for (i = 0; envopts[i].name != NULL; i++)
 		if ((s = getenv(envopts[i].name)) != NULL) {
-			atou_fatal(s, envopts[i].sec, envopts[i].msec);
+			atou_fatal(s, envopts[i].sec, envopts[i].msec,
+			    envopts[i].issig);
 			optset = 1;
 		}
 
 #ifdef PARSE_CMDLINE
-	while ((ch = getopt(argc, argv, "+qpS:s:T:t:")) != -1) {
+	listsigs = 0;
+	while ((ch = getopt(argc, argv, "+lqpS:s:T:t:")) != -1) {
 		switch (ch) {
+			case 'l':
+				listsigs = 1;
+				break;
 			case 'p':
 				propagate = 1;
 				break;
@@ -181,13 +271,21 @@ init(int argc, char *argv[]) {
 					if (ch == envopts[i].opt) {
 						atou_fatal(optarg,
 						    envopts[i].sec,
-						    envopts[i].msec);
+						    envopts[i].msec,
+						    envopts[i].issig);
 						optset = 1;
 						break;
 					}
 				if (envopts[i].name == NULL)
 					usage();
 		}
+	}
+
+	if (listsigs) {
+		for (i = 0; i < SIGNALS; i++)
+			printf("%s%c", signals[i].name,
+			    i + 1 < SIGNALS? ' ': '\n');
+		exit(EX_OK);
 	}
 #else
 	optind = 1;
