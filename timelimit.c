@@ -28,10 +28,11 @@
 
 #define PARSE_CMDLINE
 
-unsigned long	warntime, warnmsec, cpuwarntime, cpuwarnmsec, killtime, killmsec;
+unsigned long	warntime, warnmsec, warncputime, warncpumsec, killtime, killmsec;
 unsigned long	warnsig, killsig;
+unsigned long sandbox_uid = 0, sandbox_gid = 0;
 volatile int	fdone, falarm, fsig, sigcaught;
-int		propagate, quiet;
+int		propagate, quiet, quiet_child;
 
 static struct {
 	const char	*name, opt, issig;
@@ -41,7 +42,9 @@ static struct {
 	{"KILLTIME",	'T',	0,	&killtime, &killmsec},
 	{"WARNSIG",	's',	1,	&warnsig, NULL},
 	{"WARNTIME",	't',	0,	&warntime, &warnmsec},
-	{"CPUWARNTIME",	'c',	0,	&cpuwarntime, &cpuwarnmsec},
+	{"WARNCPUTIME",	'c',	0,	&warncputime, &warncpumsec},
+	{"SANDBOX_UID",	'u',	0,	&sandbox_uid, NULL},
+	{"SANDBOX_GID",	'g',	0,	&sandbox_gid, NULL},
 	{NULL,		0,	0,	NULL, NULL}
 };
 
@@ -172,7 +175,7 @@ warnx(const char *fmt, ...) {
 static void
 usage(void) {
 	errx(EX_USAGE, "usage: timelimit [-pq] [-S ksig] [-s wsig] "
-	    "[-T ktime] [-t wtime] command");
+		"[-T ktime] [-t wtime] command");
 }
 
 static void
@@ -221,7 +224,7 @@ atou_fatal(const char *s, unsigned long *sec, unsigned long *msec, int issig) {
 #ifndef HAVE_SETITIMER
 	if (msec != 0)
 		errx(EX_UNAVAILABLE,
-		    "subsecond precision not supported on this platform");
+			"subsecond precision not supported on this platform");
 #endif
 	*sec = v;
 	*msec = vm * mul;
@@ -238,10 +241,11 @@ init(int argc, char *argv[]) {
 	
 	/* defaults */
 	quiet = 0;
+	quiet_child = 0;
 	warnsig = SIGTERM;
 	killsig = SIGKILL;
-	warntime = cpuwarntime = 3600;
-	warnmsec = cpuwarnmsec = 0;
+	warntime = warncputime = 3600;
+	warnmsec = warncpumsec = 0;
 	killtime = 120;
 	killmsec = 0;
 
@@ -251,13 +255,13 @@ init(int argc, char *argv[]) {
 	for (i = 0; envopts[i].name != NULL; i++)
 		if ((s = getenv(envopts[i].name)) != NULL) {
 			atou_fatal(s, envopts[i].sec, envopts[i].msec,
-			    envopts[i].issig);
+				envopts[i].issig);
 			optset = 1;
 		}
 
 #ifdef PARSE_CMDLINE
 	listsigs = 0;
-	while ((ch = getopt(argc, argv, "+lqpS:s:T:t:c:")) != -1) {
+	while ((ch = getopt(argc, argv, "+lqQpS:s:T:t:c:u:g:")) != -1) {
 		switch (ch) {
 			case 'l':
 				listsigs = 1;
@@ -268,14 +272,17 @@ init(int argc, char *argv[]) {
 			case 'q':
 				quiet = 1;
 				break;
+			case 'Q':
+				quiet_child = 1;
+				break;
 			default:
 				/* check if it's a recognized option */
 				for (i = 0; envopts[i].name != NULL; i++)
 					if (ch == envopts[i].opt) {
 						atou_fatal(optarg,
-						    envopts[i].sec,
-						    envopts[i].msec,
-						    envopts[i].issig);
+							envopts[i].sec,
+							envopts[i].msec,
+							envopts[i].issig);
 						optset = 1;
 						break;
 					}
@@ -287,7 +294,7 @@ init(int argc, char *argv[]) {
 	if (listsigs) {
 		for (i = 0; i < SIGNALS; i++)
 			printf("%s%c", signals[i].name,
-			    i + 1 < SIGNALS? ' ': '\n');
+				i + 1 < SIGNALS? ' ': '\n');
 		exit(EX_OK);
 	}
 #else
@@ -296,8 +303,8 @@ init(int argc, char *argv[]) {
 
 	if (!optset) /* && !quiet? */
 		warnx("using defaults: warntime=%lu, warnsig=%lu, "
-		    "killtime=%lu, killsig=%lu",
-		    warntime, warnsig, killtime, killsig);
+			"killtime=%lu, killsig=%lu",
+			warntime, warnsig, killtime, killsig);
 
 	argc -= optind;
 	argv += optind;
@@ -368,7 +375,7 @@ settimer(const char *name, unsigned long sec, unsigned long msec, int cputime)
 	alarm(sec);
 #endif
 }
-    
+
 static pid_t
 doit(char *argv[]) {
 	pid_t pid;
@@ -387,7 +394,32 @@ doit(char *argv[]) {
 		err(EX_OSERR, "fork");
 	if (pid == 0)
 	{
-		settimer("child", cpuwarntime, cpuwarnmsec, 1);
+		if (quiet_child)
+		{
+			/* silence stdin/cin, stdout/cout & stderr/cerr */
+			if (close(0) < 0)
+				err(EX_OSERR, "close_stdin");
+			if (close(1) < 0)
+				err(EX_OSERR, "close_stdout");
+			if (close(2) < 0)
+				err(EX_OSERR, "close_stderr");
+		}
+
+		if (sandbox_gid)
+		{
+			/* change group */
+			setgroups(0, NULL);
+			setregid(sandbox_gid, sandbox_gid);
+		}
+		if (sandbox_uid)
+		{
+			/* change user */
+			setreuid(sandbox_uid, sandbox_uid);
+		}
+
+		/* set SIGVTALRM timer on CPU usage */
+		settimer("child", warncputime, warncpumsec, 1);
+
 		child(argv);
 	}
 
@@ -439,7 +471,7 @@ static void
 terminated(const char *period) {
 
 	errx(EX_SOFTWARE, "terminated by signal %d during the %s period",
-	    sigcaught, period);
+		sigcaught, period);
 }
 
 static void
@@ -471,7 +503,7 @@ main(int argc, char *argv[]) {
 
 	if (waitpid(pid, &status, 0) == -1)
 		err(EX_OSERR, "could not get the exit status for process %ld",
-		    (long)pid);
+			(long)pid);
 	if (WIFEXITED(status))
 		return (WEXITSTATUS(status));
 	else if (!WIFSIGNALED(status))

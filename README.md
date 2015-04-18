@@ -29,6 +29,12 @@ Other tries to implement this:
 * `timer_create(CLOCK_PROCESS_CPUTIME_ID)` is not inherited by `fork`/`execve`, so it cannot be
 applied here.
 
+Other added features:
+
+* `-Q` - silence child program stdout/stderr/stdin;
+* `-u <uid>` - drop privileges to the specified user id;
+* `-g <gid>` - drop privileges to the specified group id.
+
 
 Example of bypassing `setitimer(ITIMER_VIRTUAL)`
 ------------------------------------------------

@@ -36,6 +36,7 @@
 #include <sys/time.h>
 #include <sys/wait.h>
 
+#include <fcntl.h>
 #include <signal.h>
 #include <stdarg.h>
 #include <stdio.h>
