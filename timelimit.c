@@ -28,7 +28,7 @@
 
 #define PARSE_CMDLINE
 
-unsigned long	warntime, warnmsec, killtime, killmsec;
+unsigned long	warntime, warnmsec, cpuwarntime, cpuwarnmsec, killtime, killmsec;
 unsigned long	warnsig, killsig;
 volatile int	fdone, falarm, fsig, sigcaught;
 int		propagate, quiet;
@@ -41,6 +41,7 @@ static struct {
 	{"KILLTIME",	'T',	0,	&killtime, &killmsec},
 	{"WARNSIG",	's',	1,	&warnsig, NULL},
 	{"WARNTIME",	't',	0,	&warntime, &warnmsec},
+	{"CPUWARNTIME",	'c',	0,	&cpuwarntime, &cpuwarnmsec},
 	{NULL,		0,	0,	NULL, NULL}
 };
 
@@ -239,8 +240,8 @@ init(int argc, char *argv[]) {
 	quiet = 0;
 	warnsig = SIGTERM;
 	killsig = SIGKILL;
-	warntime = 3600;
-	warnmsec = 0;
+	warntime = cpuwarntime = 3600;
+	warnmsec = cpuwarnmsec = 0;
 	killtime = 120;
 	killmsec = 0;
 
@@ -256,7 +257,7 @@ init(int argc, char *argv[]) {
 
 #ifdef PARSE_CMDLINE
 	listsigs = 0;
-	while ((ch = getopt(argc, argv, "+lqpS:s:T:t:")) != -1) {
+	while ((ch = getopt(argc, argv, "+lqpS:s:T:t:c:")) != -1) {
 		switch (ch) {
 			case 'l':
 				listsigs = 1;
@@ -316,7 +317,6 @@ sigchld(int sig __unused) {
 
 static void
 sigalrm(int sig __unused) {
-
 	falarm = 1;
 }
 
@@ -354,7 +354,7 @@ setsig_fatal_gen(int sig, void (*handler)(int), int nocld, const char *what) {
 }
 
 static void
-settimer(const char *name, unsigned long sec, unsigned long msec)
+settimer(const char *name, unsigned long sec, unsigned long msec, int cputime)
 {
 #ifdef HAVE_SETITIMER
 	struct itimerval tval;
@@ -362,7 +362,7 @@ settimer(const char *name, unsigned long sec, unsigned long msec)
 	tval.it_interval.tv_sec = tval.it_interval.tv_usec = 0;
 	tval.it_value.tv_sec = sec;
 	tval.it_value.tv_usec = msec;
-	if (setitimer(ITIMER_REAL, &tval, NULL) == -1)
+	if (setitimer(cputime ? ITIMER_VIRTUAL : ITIMER_REAL, &tval, NULL) == -1)
 		err(EX_OSERR, "could not set the %s timer", name);
 #else
 	alarm(sec);
@@ -386,10 +386,13 @@ doit(char *argv[]) {
 	if ((pid = fork()) < 0)
 		err(EX_OSERR, "fork");
 	if (pid == 0)
+	{
+		settimer("child", cpuwarntime, cpuwarnmsec, 1);
 		child(argv);
+	}
 
 	/* sleep for the allowed time */
-	settimer("warning", warntime, warnmsec);
+	settimer("warning", warntime, warnmsec, 0);
 	while (!(fdone || falarm || fsig))
 		pause();
 	alarm(0);
@@ -415,7 +418,7 @@ doit(char *argv[]) {
 #endif /* HAVE_SIGACTION */
 
 	/* sleep for the grace time */
-	settimer("kill", killtime, killmsec);
+	settimer("kill", killtime, killmsec, 0);
 	while (!(fdone || falarm || fsig))
 		pause();
 	alarm(0);

@@ -37,6 +37,7 @@
 .Op Fl s Ar warnsig
 .Op Fl T Ar killtime
 .Op Fl t Ar warntime
+.Op Fl c Ar warncputime
 .Ar command
 .Op Ar arguments ...
 .Sh DESCRIPTION
@@ -88,12 +89,17 @@ Defaults to 120 seconds.
 Specify the maximum execution time of the process in seconds before sending
 .Ar warnsig .
 Defaults to 3600 seconds.
+.It Fl c Ar warncputime
+Specify the maximum CPU execution time of the process in seconds before sending
+SIGVTALRM (it cannot be changed by design).
+Defaults to 3600 seconds.
 .El
 .Pp
 On systems that support the
 .Xr setitimer 2
-system call, the
+system call, the 
 .Ar warntime
+.Ar warncputime
 and
 .Ar killtime
 values may be specified in fractional seconds with microsecond precision.
