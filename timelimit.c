@@ -396,9 +396,7 @@ doit(char *argv[]) {
 	{
 		if (quiet_child)
 		{
-			/* silence stdin/cin, stdout/cout & stderr/cerr */
-			if (close(0) < 0)
-				err(EX_OSERR, "close_stdin");
+			/* silence stdout/cout & stderr/cerr */
 			if (close(1) < 0)
 				err(EX_OSERR, "close_stdout");
 			if (close(2) < 0)
