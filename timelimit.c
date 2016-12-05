@@ -32,7 +32,7 @@ unsigned long	warntime, warnmsec, warncputime, warncpumsec, killtime, killmsec;
 unsigned long	warnsig, killsig;
 unsigned long sandbox_uid = 0, sandbox_gid = 0;
 volatile int	fdone, falarm, fsig, sigcaught;
-int		propagate, quiet, quiet_child;
+int		propagate, quiet, quiet_child, redirect_child_output;
 
 static struct {
 	const char	*name, opt, issig;
@@ -242,6 +242,7 @@ init(int argc, char *argv[]) {
 	/* defaults */
 	quiet = 0;
 	quiet_child = 0;
+	redirect_child_output = 0;
 	warnsig = SIGTERM;
 	killsig = SIGKILL;
 	warntime = warncputime = 3600;
@@ -261,7 +262,7 @@ init(int argc, char *argv[]) {
 
 #ifdef PARSE_CMDLINE
 	listsigs = 0;
-	while ((ch = getopt(argc, argv, "+lqQpS:s:T:t:c:u:g:")) != -1) {
+	while ((ch = getopt(argc, argv, "+lqQpRS:s:T:t:c:u:g:")) != -1) {
 		switch (ch) {
 			case 'l':
 				listsigs = 1;
@@ -274,6 +275,9 @@ init(int argc, char *argv[]) {
 				break;
 			case 'Q':
 				quiet_child = 1;
+				break;
+			case 'R':
+				redirect_child_output = 1;
 				break;
 			default:
 				/* check if it's a recognized option */
@@ -401,6 +405,15 @@ doit(char *argv[]) {
 				err(EX_OSERR, "close_stdout");
 			if (close(2) < 0)
 				err(EX_OSERR, "close_stderr");
+		}
+		if (redirect_child_output)
+		{
+			/* redirect stdout/cout & stderr/cerr to stdout.txt */
+			int new_stdout_fd = open("stdout.txt", O_CREAT | O_WRONLY | O_TRUNC, 0666);
+			if (new_stdout_fd < 0)
+				err(EX_OSERR, "open_new_stdout");
+			if (dup2(new_stdout_fd, 1) < 0)
+				err(EX_OSERR, "redirect_stdout");
 		}
 
 		if (sandbox_gid)
