@@ -408,12 +408,17 @@ doit(char *argv[]) {
 		}
 		if (redirect_child_output)
 		{
-			/* redirect stdout/cout & stderr/cerr to stdout.txt */
+			/* redirect stdout/cout & stderr/cerr to stdout.txt & stderr.txt */
 			int new_stdout_fd = open("stdout.txt", O_CREAT | O_WRONLY | O_TRUNC, 0666);
 			if (new_stdout_fd < 0)
 				err(EX_OSERR, "open_new_stdout");
 			if (dup2(new_stdout_fd, 1) < 0)
 				err(EX_OSERR, "redirect_stdout");
+			int new_stderr_fd = open("stderr.txt", O_CREAT | O_WRONLY | O_TRUNC, 0666);
+			if (new_stderr_fd < 0)
+				err(EX_OSERR, "open_new_stderr");
+			if (dup2(new_stderr_fd, 2) < 0)
+				err(EX_OSERR, "redirect_stderr");
 		}
 
 		if (sandbox_gid)
